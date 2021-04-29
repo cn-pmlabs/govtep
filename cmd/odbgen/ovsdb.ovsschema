@@ -1,0 +1,60 @@
+{
+  "name": "OVS_DB",
+  "tables": {
+    "Table_A": {
+      "columns": {
+        "name": {"type": "string"},
+        "num_id_1": {"type": "integer"},
+        "enable": {"type": "boolean"},
+        "reftable": {
+          "type": {"key": {"type": "uuid", "refTable": "Table_B"},
+                   "min": 0, "max": "unlimited"}},
+        "set": {
+          "type": {"key": {"type": "string", "enum": ["set",
+							["physical_port", "lag", "vlan", "bridge_domain", "sub_port"]], 
+              "default": "physical_port"}, "min": 1, "max": 128}},
+        "dot1p_to_tc": {
+					"type": {
+						"key": {
+							"type": "string",
+							"enum": ["set",
+							["0", "1", "2", "3", "4", "5", "6", "7"]]
+						},
+						"value": {
+							"type": "string",
+							"enum": ["set",
+							["BE", "AF1", "AF2", "AF3", "AF4", "EF", "CS6", "CS7"]]
+						},
+            "default": {"0":"BE", "1":"AF1", "2":"AF2", "3":"AF3",
+                        "4":"AF4", "5":"EF", "6":"CS6", "7":"CS7"},
+						"min": 0,
+						"max": 8
+					}
+				},
+        "number": {
+          "type": {"key": {"type": "integer", "minInteger": 0, "maxInteger": 4294967295, "default": 1000}, "min": 0, "max": 1}},
+        "map": {
+          "type": {"key": "string", "value": "string",
+                   "min": 0, "max": "unlimited"}}},
+      "indexes": [["name"], ["name", "num_id_1"]],
+      "isRoot": true},
+    "Table_B": {
+      "columns": {
+        "name": {"type": "string"},
+        "enable": {
+          "type": {"key": {"type": "boolean", "default": true}, "min": 0, "max": 1}}},
+      "indexes": [["name"]],
+      "isRoot": false},
+    "Table_Global": {
+      "columns": {
+        "name": {"type": "string"},
+        "set": {
+          "type": {"key": {"type": "string"}, "min": 1, "max": 128}},
+        "map": {
+          "type": {"key": "string", "value": "string",
+                   "min": 0, "max": "unlimited"}}},
+      "maxRows": 1,
+      "isRoot": true}
+  },
+  "version": "1.0.0"
+}

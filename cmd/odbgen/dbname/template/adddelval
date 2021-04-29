@@ -1,0 +1,35 @@
+// TABLENAMEUpdateFIELDAddvalue add value for array field of TABLENAME
+func TABLENAMEUpdateFIELDAddvalue(tableIndex interface{},
+	field []TYPE) error {
+	oSet, err := libovsdb.NewOvsSet(field)
+	if err != nil {
+		return fmt.Errorf("OvsSet trans error for %v", field)
+	}
+
+	var mutations []interface{}
+	mutations = append(mutations, libovsdb.NewMutation(TABLENAMEFieldFIELD, opInsert, oSet))
+	conditions, _ := convertIndexToConditions(tableIndex, TABLENAMEFieldMapToColumn)
+
+	if MutateRows(TABLENAME, mutations, conditions) == 0 {
+		return fmt.Errorf("Update field %v failed", field)
+	}
+	return nil
+}
+
+// TABLENAMEUpdateFIELDDelvalue del value for array field of TABLENAME
+func TABLENAMEUpdateFIELDDelvalue(tableIndex interface{},
+	field []TYPE) error {
+	oSet, err := libovsdb.NewOvsSet(field)
+	if err != nil {
+		return fmt.Errorf("OvsSet trans error for %v", field)
+	}
+
+	var mutations []interface{}
+	mutations = append(mutations, libovsdb.NewMutation(TABLENAMEFieldFIELD, opDelete, oSet))
+	conditions, _ := convertIndexToConditions(tableIndex, TABLENAMEFieldMapToColumn)
+
+	if MutateRows(TABLENAME, mutations, conditions) == 0 {
+		return fmt.Errorf("Update field %v failed", field)
+	}
+	return nil
+}

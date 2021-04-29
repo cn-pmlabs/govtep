@@ -1,0 +1,35 @@
+// TABLENAMEUpdateFIELDSetkey set key for map field of TABLENAME
+func TABLENAMEUpdateFIELDSetkey(tableIndex interface{},
+	field map[interface{}]interface{}) error {
+	oMap, err := libovsdb.NewOvsMap(field)
+	if err != nil {
+		return fmt.Errorf("OvsMap trans error for %v", field)
+	}
+
+	var mutations []interface{}
+	mutations = append(mutations, libovsdb.NewMutation(TABLENAMEFieldFIELD, opInsert, oMap))
+	conditions, _ := convertIndexToConditions(tableIndex, TABLENAMEFieldMapToColumn)
+
+	if MutateRows(TABLENAME, mutations, conditions) == 0 {
+		return fmt.Errorf("Update field %v failed", field)
+	}
+	return nil
+}
+
+// TABLENAMEUpdateFIELDDelkey del key for map field of TABLENAME
+func TABLENAMEUpdateFIELDDelkey(tableIndex interface{},
+	field map[interface{}]interface{}) error {
+	oMap, err := libovsdb.NewOvsMap(field)
+	if err != nil {
+		return fmt.Errorf("OvsMap trans error for %v", field)
+	}
+
+	var mutations []interface{}
+	mutations = append(mutations, libovsdb.NewMutation(TABLENAMEFieldFIELD, opDelete, oMap))
+	conditions, _ := convertIndexToConditions(tableIndex, TABLENAMEFieldMapToColumn)
+
+	if MutateRows(TABLENAME, mutations, conditions) == 0 {
+		return fmt.Errorf("Update field %v failed", field)
+	}
+	return nil
+}

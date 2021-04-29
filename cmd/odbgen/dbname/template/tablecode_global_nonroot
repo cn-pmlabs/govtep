@@ -1,0 +1,84 @@
+// TABLENAMEAdd create TABLENAME
+// return insert Operation for non-root table
+func TABLENAMEAddOp(table TableTABLENAME) (libovsdb.Operation, error) {
+	namedUUID, err := newRowUUID()
+	if err != nil {
+		return libovsdb.Operation{}, err
+	}
+
+	row, err := ConvertTableToRow(table, TABLENAMEFieldMapToColumn)
+	if err != nil {
+		return libovsdb.Operation{}, err
+	}
+	insertOp := libovsdb.Operation{
+		Op:       opInsert,
+		Table:    TABLENAME,
+		Row:      row,
+		UUIDName: namedUUID,
+	}
+	return insertOp, err
+}
+
+// TABLENAMESet set fields of TABLENAME
+func TABLENAMESet(table TableTABLENAME) error {
+	var conditions []interface{}
+	conditions = append(conditions, libovsdb.
+		NewCondition("_uuid", "!=", libovsdb.UUID{GoUUID: InvalidUUID}))
+	if _, num := SelectRows(TABLENAME, conditions); num != 1 {
+		return fmt.Errorf("table %v not created yet", TABLENAME)
+	}
+
+	rowsUpdate, err := ConvertTableToRow(table, TABLENAMEFieldMapToColumn)
+	if err != nil {
+		return err
+	}
+	if UpdateRows(TABLENAME, rowsUpdate, conditions) == 0 {
+		return fmt.Errorf("Set fields %v failed", table)
+	}
+	return nil
+}
+
+// TABLENAMEGet get TABLENAME rows
+func TABLENAMEGet() (TableTABLENAME, error) {
+	var conditions []interface{}
+	conditions = append(conditions, libovsdb.
+		NewCondition("_uuid", "!=", libovsdb.UUID{GoUUID: InvalidUUID}))
+	rows, num := SelectRows(TABLENAME, conditions)
+	if num != 1 {
+		return TableTABLENAME{}, fmt.Errorf("table %v not created yet", TABLENAME)
+	}
+	table := ConvertRowToTABLENAME(rows[0])
+	return table, nil
+}
+
+// TABLENAMEIterator traverse TABLENAME and call fn
+// return traversed number
+func TABLENAMEIterator(fn func(TableTABLENAME)) int {
+	var conditions []interface{}
+	conditions = append(conditions, libovsdb.
+		NewCondition("_uuid", "!=", libovsdb.UUID{GoUUID: InvalidUUID}))
+	table, err := TABLENAMEGet()
+	if err != nil {
+		fn(table)
+	}
+	return 1
+}
+
+// TABLENAMESetField set field of TABLENAME
+func TABLENAMESetField(field string, value interface{}) error {
+	var conditions []interface{}
+	conditions = append(conditions, libovsdb.
+		NewCondition("_uuid", "!=", libovsdb.UUID{GoUUID: InvalidUUID}))
+	if _, num := SelectRows(TABLENAME, conditions); num != 1 {
+		return fmt.Errorf("table %v not created yet", TABLENAME)
+	}
+
+	rowUpdate, err := convertFieldToRow(field, value)
+	if err != nil {
+		return err
+	}
+	if UpdateRows(TABLENAME, rowUpdate, conditions) == 0 {
+		return fmt.Errorf("Set field %v failed", value)
+	}
+	return nil
+}

@@ -1,0 +1,30 @@
+// TABLENAMEUpdateAddFIELD add value for array field of TABLENAME
+func TABLENAMEUpdateAddFIELD(tableIndex interface{},
+    tableRef TableTABLENAMEREF) error {
+    var ops []libovsdb.Operation
+
+    insertTABLENAMEREFOp, err := TABLENAMEREFAddOp(tableRef)
+    if err != nil {
+        return fmt.Errorf("Get refTable %v operation failed", TABLENAMEFieldFIELD)
+    }
+    ops = append(ops, insertTABLENAMEREFOp)
+	
+    oSet, err := libovsdb.NewOvsSet([]libovsdb.
+        UUID{{GoUUID: insertTABLENAMEREFOp.UUIDName}})
+	var mutations []interface{}
+	mutations = append(mutations, libovsdb.NewMutation(TABLENAMEFieldFIELD, opInsert, oSet))
+	conditions, _ := convertIndexToConditions(tableIndex, TABLENAMEFieldMapToColumn)
+    mutateTABLENAMEREFOp := libovsdb.Operation{
+		Op:        opMutate,
+		Table:     TABLENAME,
+		Mutations: mutations,
+		Where:     conditions,
+	}
+    ops = append(ops, mutateTABLENAMEREFOp)
+
+	_, err = Transact(ops...)
+	if err != nil {
+		return fmt.Errorf("error: %v", err)
+	}
+	return nil
+}

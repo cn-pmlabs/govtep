@@ -1,0 +1,86 @@
+// ConvertRowToTABLENAME convert map[string]interface{} to table struct
+func ConvertRowToTABLENAME(row libovsdb.ResultRow) TableTABLENAME {
+	var table TableTABLENAME
+	tablePtr := &table
+	typ := reflect.TypeOf(table)
+	val := reflect.ValueOf(table)
+	tableElems := reflect.ValueOf(tablePtr).Elem()
+
+	float64ToInt(row)
+
+	for i := 0; i < typ.NumField(); i++ {
+		if typ.Field(i).Name == "UUID" {
+			if UUID, ok := row["_uuid"].(libovsdb.UUID); ok {
+				tableElems.FieldByName(typ.Field(i).Name).SetString(UUID.GoUUID)
+			}
+			continue
+		}
+		switch val.Field(i).Interface().(type) {
+		case string:
+			switch row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(type) {
+			case string:
+				tableElems.FieldByName(typ.Field(i).Name).
+					Set(reflect.ValueOf(row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(string)))
+			}
+		case int:
+			switch row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(type) {
+			case int:
+				tableElems.FieldByName(typ.Field(i).Name).
+					Set(reflect.ValueOf(row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(int)))
+			}
+		case bool:
+			switch row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(type) {
+			case bool:
+				tableElems.FieldByName(typ.Field(i).Name).
+					Set(reflect.ValueOf(row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(bool)))
+			}
+		case libovsdb.UUID:
+			switch row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(type) {
+			case libovsdb.UUID:
+				tableElems.FieldByName(typ.Field(i).Name).
+					Set(reflect.ValueOf(row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(libovsdb.UUID)))
+			}
+		case []string:
+			switch row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(type) {
+			case string:
+				tableElems.FieldByName(typ.Field(i).Name).
+					Set(reflect.ValueOf([]string{row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(string)}))
+			case libovsdb.OvsSet:
+				tableElems.FieldByName(typ.Field(i).Name).
+					Set(reflect.ValueOf(convertOvsSetToStringArray(row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(libovsdb.OvsSet))))
+			}
+		case []int:
+			switch row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(type) {
+			case int:
+				tableElems.FieldByName(typ.Field(i).Name).
+					Set(reflect.ValueOf([]int{row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(int)}))
+			case libovsdb.OvsSet:
+				tableElems.FieldByName(typ.Field(i).Name).
+					Set(reflect.ValueOf(convertOvsSetToIntArray(row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(libovsdb.OvsSet))))
+			}
+		case []bool:
+			switch row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(type) {
+			case bool:
+				tableElems.FieldByName(typ.Field(i).Name).
+					Set(reflect.ValueOf([]bool{row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(bool)}))
+			case libovsdb.OvsSet:
+				tableElems.FieldByName(typ.Field(i).Name).
+					Set(reflect.ValueOf(convertOvsSetToBoolArray(row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(libovsdb.OvsSet))))
+			}
+		case []libovsdb.UUID:
+			switch row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(type) {
+			case libovsdb.UUID:
+				tableElems.FieldByName(typ.Field(i).Name).
+					Set(reflect.ValueOf([]libovsdb.UUID{row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(libovsdb.UUID)}))
+			case libovsdb.OvsSet:
+				tableElems.FieldByName(typ.Field(i).Name).
+					Set(reflect.ValueOf(convertOvsSetToUUIDArray(row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(libovsdb.OvsSet))))
+			}
+		case map[interface{}]interface{}:
+			tableElems.FieldByName(typ.Field(i).Name).
+				Set(reflect.ValueOf(row[TABLENAMEFieldMapToColumn[typ.Field(i).Name]].(libovsdb.OvsMap).GoMap))
+		}
+	}
+
+	return table
+}

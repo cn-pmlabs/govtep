@@ -1,0 +1,429 @@
+{
+    "name": "CONTROLLER_VTEP",
+    "cksum": "3157379768 8682",
+    "tables": {
+        "Global": {
+            "columns": {
+                "managers": {
+                    "type": {"key": {"type": "uuid",
+                                     "refTable": "Manager"},
+                                     "min": 0, "max": "unlimited"}},
+                "ovnnb_target": {"type": "string",
+                                 "zh_name": "OVN 北向连接",
+                                 "en_name": "OVNNB Connection",
+                                 "zh_desc": "OVN 北向数据库连接，格式 tcp:host[:port]，例如 tcp:10.10.1.10:6641",
+                                 "en_desc": "OVN northbound DB connection, format tcp:host[:port], e.g. tcp:10.10.1.10:6641",
+                                 "zh_tips": "OVN 北向数据库连接，格式 tcp:host[:port]，例如 tcp:10.10.1.10:6641",
+                                 "en_tips": "OVN northbound DB connection, format tcp:host[:port], e.g. tcp:10.10.1.10:6641"},
+                "ovnsb_target": {"type": "string",
+                                 "zh_name": "OVN 南向连接",
+                                 "en_name": "OVNSB Connection",
+                                 "zh_desc": "OVN 南向数据库连接，格式 tcp:host[:port]，例如 tcp:10.10.1.10:6642",
+                                 "en_desc": "OVN southbound DB connection, format tcp:host[:port], e.g. tcp:10.10.1.10:6642",
+                                 "zh_tips": "OVN 南向数据库连接，格式 tcp:host[:port]，例如 tcp:10.10.1.10:6642",
+                                 "en_tips": "OVN southbound DB connection, format tcp:host[:port], e.g. tcp:10.10.1.10:6642"},
+                "other_config": {
+                    "type": {"key": "string", "value": "string",
+                                     "min": 0, "max": "unlimited"}}
+            },
+            "maxRows": 1,
+            "isRoot": true},
+        "Physical_Switch": {
+            "columns": {
+                "name": {"type": "string",
+                         "zh_name": "名称",
+                         "en_name": "Name"},
+                "description": {"type": "string",
+                                "zh_name": "描述",
+                                "en_name": "Description"},
+                "system_id": {"type": "string",
+                              "zh_name": "系统ID",
+                              "en_name": "System ID",
+                              "zh_desc": "系统ID，可选配置，不配置时由系统随机生成UUID",
+                              "en_desc": "System ID (optional), a random UUID would generated for system when not configured",
+                              "zh_tips": "系统ID，可选配置，不配置时由系统随机生成UUID",
+                              "en_tips": "System ID (optional), a random UUID would generated for system when not configured"},
+                "encap_type": {"type": "string",
+                               "zh_name": "封装类型",
+                               "en_name": "Encap type",
+                               "zh_desc": "隧道封装类型，目前支持 vxlan",
+                               "en_desc": "Tunnel encap type, support vxlan for now",
+                               "zh_tips": "隧道封装类型，目前支持 vxlan",
+                               "en_tips": "Tunnel encap type, support vxlan for now"},
+                "encap_ip": {"type": "string",
+                             "zh_name": "封装IP",
+                             "en_name": "Encap IP",
+                             "zh_desc": "隧道封装IP",
+                             "en_desc": "Tunnel encap IP",
+                             "zh_tips": "隧道封装IP",
+                             "en_tips": "Tunnel encap IP"},
+                "router_mac": {"type": "string",
+                               "zh_name": "Router MAC",
+                               "en_name": "Router MAC",
+                               "zh_desc": "",
+                               "en_desc": "",
+                               "zh_tips": "物理交换机的路由MAC或者网关多活组的虚拟MAC",
+                               "en_tips": "Router MAC belongs to the physical switch or Gateway HA Group"},
+                "group_member": {"type": "boolean"},
+                "gateway_group": {"type": "boolean",
+                                  "zh_name": "网关多活组",
+                                  "en_name": "Gateway HA group",
+                                  "zh_desc": "",
+                                  "en_desc": "",
+                                  "zh_tips": "是否配置为网关多活组",
+                                  "en_tips": "Whether to configure as a gateway HA group"},
+                "ports": {
+                    "type": {"key": {"type": "uuid", "refTable": "Physical_Port"},
+                                     "min": 0, "max": "unlimited"}},
+                "other_config": {
+                    "type": {"key": "string", "value": "string",
+                                    "min": 0, "max": "unlimited"}},
+                "switch_fault_status": {
+                    "type": {"key": "string", 
+                             "min": 0, "max": "unlimited"},
+                    "ephemeral": true}},
+            "indexes": [["name"], ["system_id"]],
+            "isRoot": true},
+        "Physical_Port": {
+            "columns": {
+                "name": {"type": "string"},
+                "description": {"type": "string"},
+                "vlan_bindings": {
+                    "type": {"key": {"type": "integer",
+                                     "minInteger": 0, "maxInteger": 4095},
+                                     "value": {"type": "uuid", "refTable": "Logical_Switch"},
+                                     "min": 0, "max": "unlimited"}},
+                "acl_bindings": {
+                    "type": {"key": {"type": "integer",
+                                     "minInteger": 0, "maxInteger": 4095},
+                                     "value": {"type": "uuid", "refTable": "ACL"},
+                                     "min": 0, "max": "unlimited"}},
+                "other_config": {
+                    "type": {"key": "string", "value": "string",
+                                    "min": 0, "max": "unlimited"}},
+                "port_fault_status": {
+                    "type": {
+                        "key": "string", "min": 0, "max": "unlimited"},
+                    "ephemeral": true}},
+            "indexes": [["name"]]},
+        "Logical_Switch": {
+            "columns": {
+                "name": {"type": "string"},
+                "description": {"type": "string"},
+                "tunnel_key": {"type": {"key": "integer", "min": 0, "max": 1}},
+                "replication_mode": {
+                    "type": {
+                        "key": {
+                            "enum": ["set", ["service_node", "source_node"]],
+                            "type": "string"},"min": 0, "max": 1}},
+                "other_config": {
+                    "type": {"key": "string", "value": "string",
+                             "min": 0, "max": "unlimited"}}},
+            "isRoot": true,
+            "indexes": [["name"]]},
+        "Bridge_Domain": {
+            "columns": {
+                "name": {"type": "string"},
+                "lsname": {"type": "string"},
+                "datapath": {"type": "string"},
+                "l2vni": {"type": "integer"},
+                "l2ports": {
+                    "type": {"key": {"type": "uuid", "refTable": "L2Port"},
+                             "min": 0, "max": "unlimited"}},
+                "unicastFdb": {
+                    "type": {"key": {"type": "uuid", "refTable": "Remote_Fdb"},
+                             "min": 0, "max": "unlimited"}}},
+            "indexes": [["name"], ["datapath", "l2vni"]],
+            "isRoot": true},
+        "VRF": {
+            "columns": {
+                "name": {"type": "string"},
+                "lrname": {"type": "string"},
+                "datapath": {"type": "string"},
+                "l3vni": {"type": "integer"},
+                "l3ports": {
+                    "type": {"key": {"type": "uuid", "refTable": "L3Port"},
+                             "min": 0, "max": "unlimited"}},
+                "pbr": {
+                    "type": {"key": {"type": "uuid", "refTable": "Policy_Based_Route"},
+                             "min": 0, "max": "unlimited"}},
+                "route": {
+                    "type": {"key": {"type": "uuid", "refTable": "Route"},
+                             "min": 0, "max": "unlimited"}},
+                "external_ips": {
+                    "type": {"key": {"type": "uuid", "refTable": "External_IP"},
+                             "min": 0, "max": "unlimited"}},
+                "gateway_conf": {
+                     "type": {"key": {"type": "uuid", "refTable": "Auto_Gateway_Conf"},
+                              "min": 0, "max": 1}}},
+            "indexes": [["name"], ["datapath", "l3vni"]],
+            "isRoot": true},
+        "L2Port": {
+            "columns": {
+                "name": {"type": "string"},
+                "type": {"type": "string"},
+                "logical_port": {"type": "string"},
+                "phySwitch": {"type": "string"},
+                "phyParent_port": {"type": "string"},
+                "bd":{"type": "string"},
+                "vlantag": {"type": {"key": {"type": "integer",
+                                    "minInteger": 1,"maxInteger": 4095},"min": 0, "max": 1}},
+                "peerType": {"type": "string"},
+                "peerPort": {"type": "string"}},
+            "indexes": [["logical_port"], ["name"]],
+            "isRoot": false},
+        "L3Port": {
+            "columns": {
+                "name": {"type": "string"},
+                "type": {"type": "string"},
+                "logical_port": {"type": "string"},
+                "phySwitch": {"type": "string"},
+                "phyParent_port": {"type": "string"},
+                "vrf":{"type": "string"},
+                "vlantag": {"type": {"key": {"type": "integer",
+                                     "minInteger": 1,"maxInteger": 4095},"min": 0, "max": 1}},
+                "peerType": {"type": "string"},
+                "peerPort": {"type": "string"},
+                "ipv4addr": {"type": {"key": "string",
+                                      "min": 0, "max": "unlimited"}},
+                "ipv6addr": {"type": {"key": "string",
+                                      "min": 0, "max": "unlimited"}},
+                "neighbour": {
+                    "type": {"key": {"type": "uuid", "refTable": "Remote_Neigh"},
+                                     "min": 0, "max": "unlimited"}}},
+            "indexes": [["logical_port"], ["name"]],
+            "isRoot": false},
+        "Locator": {
+            "columns": {
+                "type": {
+                    "type": {"key": {"enum": ["set", ["vxlan"]],"type": "string"}},
+                    "mutable": false},
+                "local_locator": {"type": "boolean"},
+                "ipaddr": {"type": {"key": "string",
+                                    "min": 0, "max": "unlimited"}},
+                "route_mac": {"type": "string"},
+                "rmac_map": {"type": {"key": {"type": "string"},
+                                      "value": {"type": "string"},
+                                      "min": 0, "max": "unlimited"}},
+                "chassis_name": {"type": "string"},
+                "tunnel_key": {"type": {"key": "integer", "min": 0, "max": 1}}},
+            "indexes": [["chassis_name"]],
+            "isRoot": true},
+        "Locator_Group": {
+            "columns": {
+                "name": {"type": "string"},
+                "locators": {
+                    "type": {"key": {"type": "uuid", "refTable": "Locator"},
+                                     "min": 0, "max": "unlimited"}}},
+            "indexes": [["name"]],
+            "isRoot": true},
+        "Remote_Fdb": {
+            "columns": {
+                "bridge": {"type": "string"},
+                "mac": {"type": "string"},
+                "remote_locator": {"type": "string"}},
+            "indexes": [["bridge", "mac"]],
+            "isRoot": false},
+        "Local_Fdb": {
+            "columns": {
+                "bridge": {"type": "string"},
+                "mac": {"type": "string"},
+                "out_l2port": {"type": "string"}},
+            "indexes": [["bridge", "mac"]],
+            "isRoot": false},
+        "Mcast_Macs_Local": {
+            "columns": {
+                "mac": {"type": "string"},
+                "bridge": {"type": "string"},
+                "logical_switch": {
+                    "type": {"key": {"type": "uuid",
+                                     "refTable": "Logical_Switch"}}},
+                "locators": {
+                    "type": {"key": {"type": "uuid",
+                                     "refTable": "Locator_Group"}}},
+                "ipaddr": {"type": "string"}},
+            "indexes": [["bridge", "mac"]],
+            "isRoot": true},
+        "Mcast_Macs_Remote": {
+            "columns": {
+                "mac": {"type": "string"},
+                "bridge": {"type": "string"},
+                "logical_switch": {
+                    "type": {"key": {"type": "uuid",
+                                     "refTable": "Logical_Switch"}}},
+                "locators": {
+                    "type": {"key": {"type": "uuid",
+                                     "refTable": "Locator_Group"}}},
+                "ipaddr": {"type": "string"}},
+            "indexes": [["bridge", "mac"]],
+            "isRoot": true},
+        "Remote_Neigh": {
+            "columns": {
+                "ipaddr": {"type": "string"},
+                "mac": {"type": "string"},
+                "out_l3port": {"type": "string"},
+                "remote_locator": {"type": "string"}},
+            "indexes": [["ipaddr", "mac"]],
+            "isRoot": false},
+        "Local_Neigh": {
+            "columns": {
+                "ipaddr": {"type": "string"},
+                "mac": {"type": "string"},
+                "out_l3port": {"type": "string"}},
+            "indexes": [["ipaddr", "mac"]],
+            "isRoot": false},
+        "Route": {
+            "columns": {
+                "ip_prefix": {"type": "string"},
+                "nexthop": {"type": "string"},
+                "vrf":{"type": "string"},
+                "nh_vrf":{"type": "string"},
+                "policy": {"type": "string"},
+                "output_port": {"type": "string"},
+                "remote_locator": {"type": "string"}},
+            "indexes": [["ip_prefix", "vrf"]],
+            "isRoot": false},
+        "Policy_Based_Route": {
+            "columns": {
+                "ip": {"type": "string"},
+                "port": {"type": {"key": { "type": "integer",
+                         "minInteger": 0, "maxInteger": 65535 }, "min": 0,"max": 1}},
+                "protocol": {
+                    "type": {"key": {"type": "string",
+                             "enum": ["set", ["tcp", "udp", "sctp", "ignore"]]},
+                             "min": 0, "max": 1}},
+                "vrf":{"type": "string"},
+                "nh_vrf":{"type": "string"},
+                "logical_ips": {"type": {"key": "string",
+                                         "min": 0, "max": "unlimited"}},
+                "nh_group": {"type": {"key": "string",
+                                      "min": 0, "max": "unlimited"}},
+                "type": {
+                    "type": {"key": {"type": "string",
+                             "enum": ["set", ["lb", "snat", "dnat", "dnat_and_snat"]]},
+                             "min": 1, "max": 1}}},
+            "indexes": [["vrf", "ip", "port", "protocol", "type"]],
+            "isRoot": false},
+        "External_IP": {
+            "columns": {
+                "ip": {"type": "string"},
+                "vrf": {"type": "string"},
+                "sequence": {"type": "integer"},
+                "ref_count": {"type": "integer", "ephemeral": true}},
+            "indexes": [["ip", "vrf"]],
+            "isRoot": false},
+        "Auto_Gateway_Conf": {
+            "columns": {
+                "bdname": {"type": "string"},
+                "physical_port": {"type": "string"},
+                "vlan": {"type": "integer"},
+                "vrf": {"type": "string"},
+                "ip": {"type": "string"}},
+            "indexes": [["vrf"]],
+            "isRoot": false},
+        "ACL": {
+            "columns": {
+                "name": {"type": "string"},
+                "acl_rules": {
+                    "type": {"key": {"type": "uuid", "refTable": "ACL_Rule"},
+                                     "min": 0, "max": "unlimited"}},
+                "ports": {"type": "string"},
+                "stage": {
+                    "type": {"key": {"type": "string", "enum": ["set", ["Ingress", "Egress"]]},
+                                     "min": 1, "max": 1}},
+                "type": {
+                    "type": {"key": {"type": "string", 
+                                     "enum": ["set", ["L2", "L3", "L3V6", "Mirror", "MirrorV6"]]},
+                                     "min": 1, "max": 1}},
+                "acl_fault_status": {
+                    "type": {"key": "string", "min": 0, "max": "unlimited"},
+                    "ephemeral": true}},
+            "indexes": [["name"]],
+            "isRoot": true},
+        "ACL_Rule": {
+            "columns": {
+                "acl_name": {"type": "string"},
+                "sequence": {"type": "integer"},
+                "in_ports": {
+                    "type": {
+                        "key": "string", "min": 0, "max": "unlimited"}},
+                "out_ports": {
+                    "type": {
+                        "key": "string", "min": 0, "max": "unlimited"}},
+                "source_mac": {
+                    "type": {
+                        "key": "string", "min": 0, "max": 1}},
+                "dest_mac": {
+                    "type": {
+                        "key": "string", "min": 0, "max": 1}},
+                "ethertype": {
+                    "type": {
+                        "key": "string", "min": 0, "max": 1}},
+                "source_ip": {
+                    "type": {
+                        "key": "string", "min": 0, "max": 1}},
+                "source_mask": {
+                    "type": {
+                        "key": "string", "min": 0, "max": 1}},
+                "dest_ip": {
+                    "type": {
+                        "key": "string", "min": 0, "max": 1}},
+                "dest_mask": {
+                    "type": {
+                        "key": "string", "min": 0, "max": 1}},
+                "protocol": {
+                    "type": {
+                        "key": "integer", "min": 0, "max": 1}},
+                "source_port_min": {
+                    "type": {
+                        "key": "integer", "min": 0, "max": 1}},
+                "source_port_max": {
+                    "type": {
+                        "key": "integer", "min": 0, "max": 1}},
+                "dest_port_min": {
+                    "type": {
+                        "key": "integer", "min": 0, "max": 1}},
+                "dest_port_max": {
+                    "type": {
+                        "key": "integer", "min": 0, "max": 1}},
+                "tcp_flags": {
+                    "type": {
+                        "key": "integer", "min": 0, "max": 1}},
+                "tcp_flags_mask": {
+                    "type": {
+                        "key": "integer", "min": 0, "max": 1}},
+                "icmp_code": {
+                    "type": {
+                        "key": "integer", "min": 0, "max": 1}},
+                "icmp_type": {
+                    "type": {
+                        "key": "integer", "min": 0, "max": 1}},
+                "action": {
+                    "type": {
+                        "key": {"type": "string", "enum": ["set", ["permit", "deny"]]}}},
+                "acle_fault_status": {
+                    "type": {
+                        "key": "string", "min": 0, "max": "unlimited"},
+                    "ephemeral": true}},
+             "indexes": [["acl_name", "sequence"]],
+             "isRoot": false},
+        "Manager": {
+            "columns": {
+                "target": {"type": "string"},
+                "max_backoff": {
+                    "type": {"key": {"type": "integer",
+                                     "minInteger": 1000},
+                                     "min": 0, "max": 1}},
+                "inactivity_probe": {
+                    "type": {"key": "integer", "min": 0, "max": 1}},
+                "other_config": {
+                    "type": {"key": "string", "value": "string", "min": 0, "max": "unlimited"}},
+                "is_connected": {
+                    "type": "boolean",
+                    "ephemeral": true},
+                "status": {
+                    "type": {"key": "string", "value": "string", "min": 0, "max": "unlimited"},
+                    "ephemeral": true}},
+            "indexes": [["target"]],
+            "isRoot": false}},
+    "version": "1.0.0"}
